@@ -1750,3 +1750,7 @@ on property:sys.usb.config=mtp,mass_storage,adb,acm
 ###########################
 ##### --Project PID-- #####
 ###########################
+
+# Auto open adb for CTS test case
+on property:ro.boot.ctsdebug=1 && property:persist.sys.usb.config=charged
+    setprop persist.sys.usb.config charged,adb

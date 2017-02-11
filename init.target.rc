@@ -99,7 +99,9 @@ on post-fs-data
     mkdir /data/misc/audio_pp 0771 media audio
     mkdir /data/misc/mcRegistry 0775 system system
     mkdir /data/misc/mcRegistry/TbStorage 0700 system system
+    rm /data/misc/mcRegistry/00000000.authtokcont
     symlink /persist/tee/00000000.authtokcont.backup /data/misc/mcRegistry/00000000.authtokcont.backup
+    chmod 666 /persist/tee/00000000.authtokcont.backup
     export MC_AUTH_TOKEN_PATH /data/misc/mcRegistry
 
 on property:init.svc.bootanim=running

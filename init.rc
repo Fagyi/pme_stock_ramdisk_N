@@ -514,9 +514,6 @@ on post-fs-data
     # Set indication (checked by vold) that we have finished this action
     #setprop vold.post_fs_data_done 1
 
-    # start to cancel fsync
-    write /proc/cancel_fsync 1
-
 on boot
     # basic network init
     ifup lo
