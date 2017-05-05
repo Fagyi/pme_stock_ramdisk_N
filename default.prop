@@ -1,7 +1,7 @@
 #
 # ADDITIONAL_DEFAULT_PROPERTIES
 #
-ro.oem_unlock_supported=1
+ro.oem_unlock_supported=0
 ro.secure=1
 security.perf_harden=1
 ro.adb.secure=1
@@ -30,7 +30,7 @@ ro.logdumpd.enabled=0
 #
 # BOOTIMAGE_BUILD_PROPERTIES
 #
-ro.bootimage.build.date=三 1月 25 17:59:01 CST 2017
-ro.bootimage.build.date.utc=1485338341
-ro.bootimage.build.fingerprint=htc/pmeuhl_00401/htc_pmeuhl:7.0/NRD90M/857212.4:user/release-keys
+ro.bootimage.build.date=四 3月 23 16:44:45 CST 2017
+ro.bootimage.build.date.utc=1490258685
+ro.bootimage.build.fingerprint=htc/pmewl_00617/htc_pmewl:7.0/NRD90M/893755.2:user/release-keys
 persist.sys.usb.config=charged
