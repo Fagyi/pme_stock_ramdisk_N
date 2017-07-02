@@ -30,7 +30,7 @@ ro.logdumpd.enabled=0
 #
 # BOOTIMAGE_BUILD_PROPERTIES
 #
-ro.bootimage.build.date=四 3月 23 16:44:45 CST 2017
-ro.bootimage.build.date.utc=1490258685
-ro.bootimage.build.fingerprint=htc/pmewl_00617/htc_pmewl:7.0/NRD90M/893755.2:user/release-keys
+ro.bootimage.build.date=三 5月 10 16:27:53 CST 2017
+ro.bootimage.build.date.utc=1494404873
+ro.bootimage.build.fingerprint=htc/pmewl_00617/htc_pmewl:7.0/NRD90M/907578.11:user/release-keys
 persist.sys.usb.config=charged
