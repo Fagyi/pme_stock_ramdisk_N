@@ -19,6 +19,8 @@ subsystem adf
 /dev/hw_random            0440   root       system
 /dev/ashmem               0666   root       root
 /dev/binder               0666   root       root
+/dev/hwbinder             0666   root       root
+/dev/vndbinder            0666   root       root
 
 # Anyone can read the logs, but if they're not in the "logs"
 # group, then they'll only see log entries for their UID.
@@ -35,13 +37,11 @@ subsystem adf
 /dev/dri/*                0666   root       graphics
 
 # these should not be world writable
-/dev/diag                 0660   system     qcom_diag
+/dev/diag                 0660   radio      radio
 /dev/diag_arm9            0660   radio      radio
-/dev/android_adb          0660   adb        adb
-/dev/android_adb_enable   0660   adb        adb
 /dev/ttyMSM0              0600   bluetooth  bluetooth
-/dev/uhid                 0660   system     net_bt_stack
-/dev/uinput               0660   system     net_bt_stack
+/dev/uhid                 0660   system     bluetooth
+/dev/uinput               0660   system     bluetooth
 /dev/alarm                0664   system     radio
 /dev/rtc0                 0640   system     system
 /dev/tty0                 0660   root       system
@@ -76,12 +76,6 @@ subsystem adf
 /dev/msm_audpre           0660   system     audio
 /dev/msm_audio_ctl        0660   system     audio
 /dev/htc-acoustic         0660   system     audio
-/dev/tfa9888              0660   media      audio
-/dev/tpa6185              0660   system     audio
-/dev/rt5501               0660   system     audio
-/dev/aud_hs_amp           0660   system     audio
-/dev/tfa9887              0660   system     audio
-/dev/tfa9887l             0660   system     audio
 /dev/vdec                 0660   system     audio
 /dev/q6venc               0660   system     audio
 /dev/snd/dsp              0660   system     audio
@@ -103,9 +97,6 @@ subsystem adf
 # CDMA radio interface MUX
 /dev/ts0710mux*           0640   radio      radio
 /dev/ppp                  0660   radio      vpn
-
-# CIR
-/dev/ttyHSL2              0660   system      system
 
 # sysfs properties
 /sys/devices/platform/trusty.*      trusty_version        0440  root   log

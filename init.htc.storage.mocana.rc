@@ -8,7 +8,7 @@ on fs
 on property:sys.boot_completed=1
     start mocana-startup
 
-service mocana-startup /system/bin/sh /system/etc/init.mocana.sh
+service mocana-startup /system/vendor/bin/sh /system/etc/init.mocana.sh
     class late_start
     user root
     disabled

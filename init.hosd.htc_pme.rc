@@ -7,10 +7,10 @@ import init.hosd.cradio.rc
 #-- Modem BSP
 
 #++ Batt
-on property:ro.boot.mode=offmode_charging
-  wait /dev/block/bootdevice/by-name/system
-  mount ext4 /dev/block/bootdevice/by-name/system /system ro barrier=1
-  start hvdcp_opti
+#on property:ro.boot.mode=offmode_charging
+#  wait /dev/block/bootdevice/by-name/system
+#  mount ext4 /dev/block/bootdevice/by-name/system /system ro barrier=1
+#  start hvdcp_opti
 #-- Batt
 
 #Set 2LC as default ftm cpu policy

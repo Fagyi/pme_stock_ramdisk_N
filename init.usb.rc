@@ -22,7 +22,7 @@ service adbd /sbin/adbd --root_seclabel=u:r:su:s0
 on property:ro.kernel.qemu=1
     start adbd
 
-on boot
+on init
     setprop sys.usb.configfs 0
 
 # Used to disable USB when switching states
@@ -33,7 +33,7 @@ on property:sys.usb.config=none && property:sys.usb.configfs=0
     setprop sys.usb.state ${sys.usb.config}
 
 # this is used for charge-only after M
-on property:sys.usb.config=charged
+on property:sys.usb.config=charged && property:sys.usb.configfs=0
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor 0bb4
     write /sys/class/android_usb/android0/idProduct 0f0b
@@ -42,7 +42,7 @@ on property:sys.usb.config=charged
     setprop sys.usb.state ${sys.usb.config}
 
 # this is used for charge-only but USB debugging is on, we switch to adb after M
-on property:sys.usb.config=charged,adb
+on property:sys.usb.config=charged,adb && property:sys.usb.configfs=0
     stop adbd
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor 0bb4
@@ -53,30 +53,30 @@ on property:sys.usb.config=charged,adb
     setprop sys.usb.state ${sys.usb.config}
 
 # workaround for BT router in M release
-on property:sys.usb.config=charged,serial
+on property:sys.usb.config=charged,serial && property:sys.usb.configfs=0
     setprop sys.usb.config mass_storage,adb,serial
 
-on property:sys.usb.config=charged,adb,serial
+on property:sys.usb.config=charged,adb,serial && property:sys.usb.configfs=0
     setprop sys.usb.config mass_storage,adb,serial
 
 # workaround for GPS router in M release
-on property:sys.usb.config=charged,diag
+on property:sys.usb.config=charged,diag && property:sys.usb.configfs=0
     setprop sys.usb.config mass_storage,diag
 
-on property:sys.usb.config=charged,adb,diag
+on property:sys.usb.config=charged,adb,diag && property:sys.usb.configfs=0
     setprop sys.usb.config mass_storage,adb,diag
 
 #workaround for BT/GPS router in M release
-on property:sys.usb.config=charged,adb,diag,serial
+on property:sys.usb.config=charged,adb,diag,serial && property:sys.usb.configfs=0
     setprop sys.usb.config mass_storage,adb,diag,serial
 
-on property:sys.usb.config=charged,adb,serial,diag
+on property:sys.usb.config=charged,adb,serial,diag && property:sys.usb.configfs=0
     setprop sys.usb.config mass_storage,adb,diag,serial
 
-on property:sys.usb.config=charged,serial,diag
+on property:sys.usb.config=charged,serial,diag && property:sys.usb.configfs=0
     setprop sys.usb.config mass_storage,diag,serial
 
-on property:sys.usb.config=charged,diag,serial
+on property:sys.usb.config=charged,diag,serial && property:sys.usb.configfs=0
     setprop sys.usb.config mass_storage,diag,serial
 
 on property:sys.usb.disable=1
@@ -166,12 +166,12 @@ on property:sys.usb.config=accessory,audio_source,adb && property:sys.usb.config
 on property:persist.sys.usb.dci_activate=1
 	write /sys/module/diagchar/parameters/dci_activate 1
 
-os property:persist.sys.usb.dci_activate=0
+on property:persist.sys.usb.dci_activate=0
 	write /sys/module/diagchar/parameters/dci_activate 0
 
 # Used to set USB configuration at boot and to switch the configuration
 # when changing the default configuration
-on property:persist.sys.usb.config=*
+on boot && property:persist.sys.usb.config=*
     setprop sys.usb.config ${persist.sys.usb.config}
 
 #
