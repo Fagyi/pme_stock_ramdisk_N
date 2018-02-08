@@ -1,5 +1,3 @@
-#Enabled now
-service fingerprintd /system/bin/fingerprintd
-    class late_start
-    user system
-    group system input
+on post-fs-data
+	# For MFG socket
+	mkdir /data/fpc 0770 system system

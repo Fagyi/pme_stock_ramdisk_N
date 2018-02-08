@@ -1,7 +1,7 @@
-import init.qcom.rc
-import init.htc.common.rc
-import init.htc_pme.fp.rc
-import init.htc.storage.rc
+import /vendor/etc/init/hw/init.qcom.rc
+import /vendor/etc/init/hw/init.htc.common.rc
+import /vendor/etc/init/hw/init.htc_pme.fp.rc
+import /vendor/etc/init/hw/init.htc.storage.rc
 import init.htc.storage.exfat.rc
 import init.htc.storage.mocana.rc
 
@@ -21,14 +21,26 @@ service shub_dbg /system/bin/shub_dbg
 # HTC sensor_hub - END
 
 on fs
-    # Mount slpi image
-    mkdir /firmware/slpi 0771 system system
-    wait /dev/block/bootdevice/by-name/slpi
-    mount vfat /dev/block/bootdevice/by-name/slpi /firmware/slpi ro shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
+    #Modem_BSP+
+    #mount rfg_3
+    mkdir /firmware 0771 system system
+    mkdir /firmware/wsd 0500 rfs rfs
+    wait /dev/block/bootdevice/by-name/rfg_3
+    mount vfat /dev/block/bootdevice/by-name/rfg_3 /firmware/wsd ro shortname=lower,uid=2951,gid=2951,dmask=277,fmask=377
+    #Modem_BSP-
 
 on post-fs
     # for SSC | SLPI
     mkdir /persist/sensors 0775 sensors sensors
+
+on post-fs-data
+    # for CwMcuSensor
+    mkdir /data/vendor/sensor
+    chown root system /data/vendor/sensor
+    chmod 0770 /data/vendor/sensor
+
+on boot
+    enable qcom-usb-sh
 
 # +SSD_RIL: TMO trustonic daemon
 service tsdaemon /system/bin/tsdaemon
@@ -36,6 +48,21 @@ service tsdaemon /system/bin/tsdaemon
     user radio
     group system
 # -SSD_RIL: TMO trustonic daemon
+
+# RIL - BEGIN
+# log level control
+on property:persist.sys.htcdebugflag=1
+    setprop persist.log.tag.QC-NETMGR-LIB V
+    setprop persist.log.tag.RILQ V
+    setprop persist.log.tag.RILJ V
+    setprop persist.log.tag.Diag_Lib V
+
+on property:persist.sys.htcdebugflag=0
+    setprop persist.log.tag.QC-NETMGR-LIB W
+    setprop persist.log.tag.RILQ W
+    setprop persist.log.tag.RILJ W
+    setprop persist.log.tag.Diag_Lib W
+# RIL - END
 
 #++ DMAgent
 service dmagent /system/bin/dmagent
@@ -57,19 +84,51 @@ service htcdcpd /system/bin/htcdcpd
     group root
 # HTC Charger
 
-# HTC network - BEGIN
-service htcnetdump /system/bin/htcnetdump
+# HTC Network - BEGIN
+service htcnetd /system/bin/htcnetd
     class main
+    socket htcnetd stream 0660 root inet
     user root
-    disabled
 
-on property:persist.sys.htcnetdump=1
-    start htcnetdump
+# log level control
+on property:persist.sys.htcdebugflag=1
+    setprop persist.log.tag.dnsmasq V
+    setprop persist.log.tag.Netd V
+    setprop persist.log.tag.NetdConnector V
+    setprop persist.log.tag.IptablesRestoreController V
+    setprop persist.log.tag.BandwidthController V
+    setprop persist.log.tag.NetUtilsWrapper V
+    setprop persist.log.tag.iptables V
+    setprop persist.log.tag.ip6tables V
+    setprop persist.log.tag.DnsProxyListener V
 
-on property:persist.sys.htcnetdump=0
-    stop htcnetdump
+on property:persist.sys.htcdebugflag=0
+    setprop persist.log.tag.dnsmasq W
+    setprop persist.log.tag.Netd W
+    setprop persist.log.tag.NetdConnector W
+    setprop persist.log.tag.IptablesRestoreController W
+    setprop persist.log.tag.BandwidthController W
+    setprop persist.log.tag.NetUtilsWrapper W
+    setprop persist.log.tag.iptables W
+    setprop persist.log.tag.ip6tables W
+    setprop persist.log.tag.DnsProxyListener W
+# HTC Network - END
 
-# HTC network - END
+# HTC Camera - BEGIN
+on property:persist.sys.htcdebugflag=1
+    setprop persist.log.tag.QCamera V
+    setprop persist.log.tag.mm-camera V
+    setprop persist.log.tag.camera-HTC-AEC V
+    setprop persist.log.tag.QCamera2HWI V
+    setprop persist.log.tag.EXT_REF V
+
+on property:persist.sys.htcdebugflag=0
+    setprop persist.log.tag.QCamera W
+    setprop persist.log.tag.mm-camera W
+    setprop persist.log.tag.camera-HTC-AEC W
+    setprop persist.log.tag.QCamera2HWI W
+    setprop persist.log.tag.EXT_REF W
+# HTC Camera - END
 
 # Security - Tamper Detection++
 service tpd_daemon /system/bin/tpd_daemon

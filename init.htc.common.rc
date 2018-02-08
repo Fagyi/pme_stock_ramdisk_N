@@ -2,48 +2,32 @@
 # # init.htc.common.rc #
 ########################
 
-import init.htc.usb.rc
+import /vendor/etc/init/hw/init.htc.usb.rc
 
 on fs
-    mkdir /firmware 0771 system system
-    mkdir /firmware/image 0771 system system
-
-    #Modem_BSP+
-    #mount rfg_3
-    mkdir /firmware/wsd 0500 rfs rfs
-    wait /dev/block/bootdevice/by-name/rfg_3
-    mount vfat /dev/block/bootdevice/by-name/rfg_3 /firmware/wsd ro shortname=lower,uid=3012,gid=3012,dmask=277,fmask=377
-    #Modem_BSP-
-
-    # Mount radio image
-    mkdir /firmware/radio 0771 system system
-    wait /dev/block/bootdevice/by-name/radio
-    mount vfat /dev/block/bootdevice/by-name/radio /firmware/radio ro shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
-
-    # Mount adsp image
-    mkdir /firmware/adsp 0771 system system
-    wait /dev/block/bootdevice/by-name/adsp
-    mount vfat /dev/block/bootdevice/by-name/adsp /firmware/adsp ro shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337
-
-    wait /system/bin/sh
-#HTC_AUD_START
-    exec -- /system/bin/sh /init.qcom.firmware_links.sh /firmware/adsp /firmware/image "adsp*"
-# 8994 only
-    exec -- /system/bin/sh /init.qcom.firmware_links.sh /firmware/cpe /firmware/image "cpe*"
-#HTC_AUD_END
-    exec -- /system/bin/sh /init.qcom.firmware_links.sh /firmware/radio /firmware/image "modem* mba* radiover* version* qdsp6m* msadp*"
-    exec -- /system/bin/sh /init.qcom.firmware_links.sh /system/etc/firmware /firmware/image "keymaste* gpta*"
-    exec -- /system/bin/sh /init.qcom.firmware_links.sh /firmware/slpi /firmware/image "slpi*"
-    exec -- /system/bin/sh /init.qcom.firmware_links.sh /system/vendor/firmware /firmware/image "keymaste*"
-
 #SSD_DISP start
     chown system graphics /sys/class/leds/lcd-backlight/cabc_level_ctl
     chown system graphics /sys/class/leds/lcd-backlight/color_temp_ctl
     chown system graphics /sys/class/leds/lcd-backlight/color_profile_ctl
     chown system graphics /sys/class/leds/lcd-backlight/disp_cali_enable
     chown system graphics /sys/class/leds/lcd-backlight/bklt_cali_enable
+    chown system graphics /sys/class/htc_display/ddic_color_mode_ctrl
+    chown system graphics /sys/class/htc_display/get_color_modes
+    chown system graphics /sys/class/htc_display/parse_bl_gain
     chown system system /sys/class/leds/lcd-backlight/burst_switch
+    chown system system /sys/class/leds/lcd-backlight/sre_enable
+
+    # AOD/Subscreen
+    chown system graphics /sys/class/graphics/fb0/aod_ctrl
+    chown system system   /sys/class/leds/sub-backlight/brightness
+    chown system graphics /sys/class/leds/sub-backlight/bl_sync
+
+    # nits will be deprecated
     chown system system /sys/class/leds/lcd-backlight-nits/brightness
+
+    # projector
+    chmod 0660 /dev/minifb
+    chown system graphics /dev/minifb
 #SSD_DISP end
 
 # maintain the list of processes name for kernel monitoring usage
@@ -65,14 +49,18 @@ on boot
 # permissions for NFC
     chmod 0600 /dev/pn544
     chown nfc nfc /dev/pn544
+# Felica++
+# permissions for Felica
+    chmod 0600 /dev/cxd224x-i2c
+    chown nfc nfc /dev/cxd224x-i2c
 
-service htc-post-boot /system/bin/sh /system/etc/init.htc.post_boot.sh
+service htc-post-boot /vendor/bin/init.htc.post_boot.sh
     class late_start
     user root
     disabled
     oneshot
 
-on property:sys.boot_completed=1
+on property:init.svc.qcom-post-boot=stopped
     start htc-post-boot
 
 on property:sys.qseecomd.stage=2
@@ -87,6 +75,7 @@ service wv-prov /system/bin/hcheck-v2
 # HTC HRDUMP - BEGIN
 on post-fs-data
     start hrdump
+    start hrdump_v2
 
 service hrdump /system/bin/hrdump -s
     disabled
@@ -97,10 +86,16 @@ service hrdump /system/bin/hrdump -s
 on property:ro.boot.htc.hrdump=detected
         setprop debug.htc.hrdump "detected"
 
+service hrdump_v2 /system/bin/hrdump_v2 -s
+    disabled
+    oneshot
+    ioprio idle 0
+    cgroup bg
+
 # HTC HRDUMP - END
 
 # HTC minidump for TellHTC - BEGIN
-service minidump-sh /system/bin/sh /init.minidump.sh
+service minidump-sh /vendor/bin/sh /vendor/bin/init.minidump.sh
     class late_start
     user root
     oneshot
@@ -138,3 +133,25 @@ on property:ro.boot.temp_protect=0
 
 on property:sys.vm.max_map_count=*
     write /proc/sys/vm/max_map_count ${sys.vm.max_map_count}
+
+service usbdiag_init /vendor/bin/init.usbdiag.sh
+    class main
+    oneshot
+
+# HTC_BT [F201708241604] Add policy for Bluetooth utsnoop - BEGIN
+
+on property:bluetooth.utsnoop=true
+    start utsnoop
+
+on property:bluetooth.utsnoop=false
+    stop utsnoop
+
+service utsnoop /vendor/bin/htc_utsnoop
+   user bluetooth
+   group bluetooth net_bt_admin sdcard_rw sdcard_r media_rw inet
+   class late_start
+   disabled
+   seclabel u:r:utsnoop:s0
+   oneshot
+
+# HTC_BT [F201708241604] Add policy for Bluetooth utsnoop - END
